@@ -7,9 +7,10 @@ This guide provides a clean and modern approach to building and installing **OMP
 
 Download version 1.8.0 boost and eigen 3.4.0 library from: 
 
-```https://www.boost.org/releases/1.80.0/
-   https://eigen.tuxfamily.org/index.php?title=Main_Page
-```
+```https://www.boost.org/releases/1.80.0/```
+
+```https://eigen.tuxfamily.org/index.php?title=Main_Page```
+
 
 ## 📁 Directory Structure Assumed
 
