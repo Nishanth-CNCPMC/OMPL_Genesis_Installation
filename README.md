@@ -1,25 +1,33 @@
 
 # OMPL (Open Motion Planning Library) – Clean Installation Guide
 
-This guide provides a clean and modern approach to building and installing **OMPL** from source in a Conda environment. It ensures compatibility with **Boost** and **Eigen** dependencies and is tested to work with **Python 3.10 and 3.11**.
+This guide provides a clean and modern approach to building and installing **OMPL** from source in a Conda environment. It ensures compatibility with **Boost** and **Eigen** dependencies and is tested to work with **Python 3.11**.
 
 ---
+
+Download version 1.8.0 boost and eigen 3.4.0 library from: 
+
+```https://www.boost.org/releases/1.80.0/
+   https://eigen.tuxfamily.org/index.php?title=Main_Page
+```
 
 ## 📁 Directory Structure Assumed
 
 ```
 ~/Downloads/
 ├── boost_1_80_0/
-├── ompl-1.7.0/
+├── eigen-3.4.0.tar.gz
 ```
 
 ---
 
 ## ⚙️ Step 1: Setup Conda Environment
 
+Use the torch.yml file in the repo and create an env using the following command:
+
 ```bash
-conda create -n ompl-env python=3.11
-conda activate ompl-env
+conda env create -f torch.yml
+conda activate torch-env #(If not already activated)
 ```
 
 ---
@@ -27,34 +35,50 @@ conda activate ompl-env
 ## 📦 Step 2: Install Eigen via Conda
 
 ```bash
-conda install -c conda-forge eigen
+cd ~/Downloads
+tar -xvzf eigen-3.4.0.tar.gz
+cd eigen-3.4.0
+```
+Build and Install:
+
+```
+mkdir -p build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
+make install
+
+```
+
+Verify installation:
+
+```bash
+ls $CONDA_PREFIX/include/eigen3/Eigen
 ```
 
 ---
 
 ## 🛠️ Step 3: Build and Install Boost (with Python bindings)
 
-### 3.1 Download Boost
+
+### 3.1 Bootstrap and Install in Conda Env
 ```bash
-cd ~/Downloads
-wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz
-tar -xvzf boost_1_80_0.tar.gz
-cd boost_1_80_0
+./bootstrap.sh
+./b2
+./b2 install --prefix=$CONDA_PREFIX
 ```
 
-### 3.2 Bootstrap with Conda Python
-```bash
-./bootstrap.sh --prefix=$CONDA_PREFIX --with-python=$(which python)
-```
-
-### 3.3 Install Boost
-```bash
-./b2 install
-```
 
 Verify:
 ```bash
 ls $CONDA_PREFIX/lib/libboost_python*
+```
+
+Before Installing OMPL, expose the env variables:
+
+```bash
+export BOOST_ROOT=$CONDA_PREFIX 
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
+export CPLUS_INCLUDE_PATH=$CONDA_PREFIX/include:$CPLUS_INCLUDE_PATH
 ```
 
 ---
@@ -142,6 +166,27 @@ Run:
 ```bash
 python test_ompl_rrt.py
 ```
+
+Possible Error:
+
+Python 3.11 gives SystemError: type Boost.Python.enum has the Py_TPFLAGS_HAVE_GC flag but has no traverse function
+
+Fix: 
+
+Step 1: 
+
+```bash
+~/Downloads/boost_1_80_0 && gedit ./libs/python/src/object/enum.cpp
+```
+
+```
+#if PY_VERSION_HEX < 0x03000000
+  | Py_TPFLAGS_CHECKTYPES
+#endif
+  | Py_TPFLAGS_HAVE_GC                    /* <============== remove this line (I think line 110)*/
+  | Py_TPFLAGS_BASETYPE,                  /* tp_flags */
+```
+Step 2: Repeat from main step 3 again.
 
 ---
 
