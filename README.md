@@ -28,7 +28,7 @@ Use the torch.yml file in the repo and create an env using the following command
 
 ```bash
 conda env create -f torch.yml
-conda activate torch-env #(If not already activated)
+conda activate torch-env #(If not already activated, also make sure to install pip install genesis-world)
 ```
 
 ---
